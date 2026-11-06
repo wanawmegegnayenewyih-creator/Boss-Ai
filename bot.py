@@ -3743,15 +3743,41 @@ def main():
             error
         )
 
-    startup_diagnostic()
+        startup_diagnostic()
 
-        if not PRIVATE_MODE:
+    if not PRIVATE_MODE:
         reengagement_thread = threading.Thread(
             target=reengagement_loop,
             daemon=True
         )
         reengagement_thread.start()
 
+    while True:
+        try:
+            bot.infinity_polling(
+                skip_pending=True,
+                timeout=30,
+                long_polling_timeout=30
+            )
+
+        except Exception as error:
+            print(
+                "Polling error:",
+                error
+            )
+            traceback.print_exc()
+
+            notify_admin(
+                "BOSSAI polling stopped with an error "
+                "and is retrying:\n"
+                + str(error)[:500]
+            )
+
+            time.sleep(5)
+
+
+if __name__ == "__main__":
+    main()
     while True:
         try:
             bot.infinity_polling(
